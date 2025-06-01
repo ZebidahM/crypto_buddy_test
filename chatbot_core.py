@@ -1,81 +1,60 @@
-# Crypto database from Task 1
-# chatbot_core.py
+import requests
 
-import nltk
-from nltk.tokenize import word_tokenize
-from nltk.stem import WordNetLemmatizer
-from nltk.corpus import stopwords
-
-# Download 
-nltk.download('punkt')
-nltk.download('wordnet')
-nltk.download('stopwords')
-
-# Preprocessing tools
-lemmatizer = WordNetLemmatizer()
-stop_words = set(stopwords.words('english'))
-
-#  Preprocess Function
-def preprocess(text):
-    tokens = word_tokenize(text.lower())                      # Break into words
-    filtered = [lemmatizer.lemmatize(w) for w in tokens if w.isalnum() and w not in stop_words]
-    return filtered
-
-crypto_db = {  
-    "Bitcoin": {  
-        "price_trend": "rising",  
-        "market_cap": "high",  
-        "energy_use": "high",  
-        "sustainability_score": 3/10  
-    },  
-    "Ethereum": {  
-        "price_trend": "stable",  
-        "market_cap": "high",  
-        "energy_use": "medium",  
-        "sustainability_score": 6/10  
-    },  
-    "Cardano": {  
-        "price_trend": "rising",  
-        "market_cap": "medium",  
-        "energy_use": "low",  
-        "sustainability_score": 8/10  
-    },  
-    "Solana": {  
-        "price_trend": "rising",  
-        "market_cap": "high",  
-        "energy_use": "low",  
-        "sustainability_score": 9/10  
-    },  
-    "Polkadot": {  
-        "price_trend": "stable",  
-        "market_cap": "medium",  
-        "energy_use": "low",  
-        "sustainability_score": 7/10  
-    },  
-    "Avalanche": {  
-        "price_trend": "rising",  
-        "market_cap": "medium",  
-        "energy_use": "medium",  
-        "sustainability_score": 6/10  
-    },  
-    "Litecoin": {  
-        "price_trend": "falling",  
-        "market_cap": "medium",  
-        "energy_use": "high",  
-        "sustainability_score": 4/10  
-    },  
-    "Chainlink": {  
-        "price_trend": "stable",  
-        "market_cap": "medium",  
-        "energy_use": "low",  
-        "sustainability_score": 8/10  
-    },  
-    "Algorand": {  
-        "price_trend": "rising",  
-        "market_cap": "low",  
-        "energy_use": "very low",  
-        "sustainability_score": 9/10  
-    }  
+crypto_db = {
+    "Bitcoin": {
+        "price_trend": "rising",
+        "market_cap": "high",
+        "energy_use": "high",
+        "sustainability_score": 0.3
+    },
+    "Ethereum": {
+        "price_trend": "stable",
+        "market_cap": "high",
+        "energy_use": "medium",
+        "sustainability_score": 0.6
+    },
+    "Cardano": {
+        "price_trend": "rising",
+        "market_cap": "medium",
+        "energy_use": "low",
+        "sustainability_score": 0.8
+    },
+    "Solana": {
+        "price_trend": "rising",
+        "market_cap": "high",
+        "energy_use": "low",
+        "sustainability_score": 0.9
+    },
+    "Polkadot": {
+        "price_trend": "stable",
+        "market_cap": "medium",
+        "energy_use": "low",
+        "sustainability_score": 0.7
+    },
+    "Avalanche": {
+        "price_trend": "rising",
+        "market_cap": "medium",
+        "energy_use": "medium",
+        "sustainability_score": 0.6
+    },
+    "Litecoin": {
+        "price_trend": "falling",
+        "market_cap": "medium",
+        "energy_use": "high",
+        "sustainability_score": 0.4
+    },
+    "Chainlink": {
+        "price_trend": "stable",
+        "market_cap": "medium",
+        "energy_use": "low",
+        "sustainability_score": 0.8
+    },
+    "Algorand": {
+        "price_trend": "rising",
+        "market_cap": "low",
+        "energy_use": "very low",
+        "sustainability_score": 0.9
+    }
 }
 
 def recommend_crypto(strategy="balanced"):
@@ -83,11 +62,11 @@ def recommend_crypto(strategy="balanced"):
     if strategy == "profitability":
         recommended = [coin for coin, data in crypto_db.items() if data["price_trend"] == "rising" and data["market_cap"] == "high"]
     elif strategy == "sustainability":
-        recommended = [coin for coin, data in crypto_db.items() if data["energy_use"] in ["low", "very low"] and data["sustainability_score"] >= 7]
+        recommended = [coin for coin, data in crypto_db.items() if data["energy_use"] in ["low", "very low"] and data["sustainability_score"] >= 0.7]
     else:
-        # Balanced approach: highest sustainability among profitable cryptos
-        recommended = max(crypto_db, key=lambda x: (crypto_db[x]["sustainability_score"], crypto_db[x]["price_trend"] == "rising"))
-        recommended = [recommended]
+        # Balanced: prefer high sustainability among profitable cryptos
+        profitable = [coin for coin, data in crypto_db.items() if data["price_trend"] == "rising"]
+        recommended = sorted(profitable, key=lambda x: crypto_db[x]["sustainability_score"], reverse=True)[:3]
 
     return f"🔍 Recommended Cryptos: {', '.join(recommended)}"
 
@@ -106,11 +85,7 @@ def parse_user_query(user_input):
 def validate_input(user_input):
     """Checks if user input contains valid keywords."""
     valid_keywords = ["trending", "sustainable", "investment", "crypto", "profit", "eco-friendly", "growth", "long-term"]
-    
-    if any(keyword in user_input.lower() for keyword in valid_keywords):
-        return True
-    else:
-        return False
+    return any(keyword in user_input.lower() for keyword in valid_keywords)
 
 def chatbot_response(user_input):
     """Provides recommendations or prompts user for better queries."""
@@ -118,9 +93,6 @@ def chatbot_response(user_input):
         return parse_user_query(user_input)
     else:
         return "🤔 I didn't quite get that. Try asking about trends or sustainability!"
-
-# Stretch goal functions
-import requests
 
 def fetch_real_time_data(crypto_name):
     """Gets latest price trends and market details from CoinGecko."""
