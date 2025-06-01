@@ -1,4 +1,8 @@
 # Crypto database from Task 1
+import nltk
+nltk.download('punkt')      # Tokenizer
+nltk.download('wordnet')    # Lemmatizer
+nltk.download('stopwords')  # Optional: remove common words
 crypto_db = {  
     "Bitcoin": {  
         "price_trend": "rising",  
