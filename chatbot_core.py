@@ -1,8 +1,26 @@
 # Crypto database from Task 1
+# chatbot_core.py
+
 import nltk
-nltk.download('punkt')      # Tokenizer
-nltk.download('wordnet')    # Lemmatizer
-nltk.download('stopwords')  # Optional: remove common words
+from nltk.tokenize import word_tokenize
+from nltk.stem import WordNetLemmatizer
+from nltk.corpus import stopwords
+
+# Download 
+nltk.download('punkt')
+nltk.download('wordnet')
+nltk.download('stopwords')
+
+# Preprocessing tools
+lemmatizer = WordNetLemmatizer()
+stop_words = set(stopwords.words('english'))
+
+#  Preprocess Function
+def preprocess(text):
+    tokens = word_tokenize(text.lower())                      # Break into words
+    filtered = [lemmatizer.lemmatize(w) for w in tokens if w.isalnum() and w not in stop_words]
+    return filtered
+
 crypto_db = {  
     "Bitcoin": {  
         "price_trend": "rising",  
